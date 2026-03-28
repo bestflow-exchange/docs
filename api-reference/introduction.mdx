@@ -1,0 +1,147 @@
+---
+title: Introduction
+description: Get started with Bestflow Exchange API - a cryptocurrency exchange aggregator for seamless cross-chain swaps
+---
+
+# Welcome to Bestflow Exchange
+
+Bestflow is a cryptocurrency exchange aggregator that provides cross-chain swap capabilities without any additional fees. It aggregates multiple exchanges to offer users the best rates and seamless cryptocurrency swaps across different networks.
+
+## Overview
+
+The Bestflow API enables developers to integrate cryptocurrency swap functionality into their applications. Key features include:
+
+- **Cross-Chain Swaps**: Seamlessly swap cryptocurrencies across different blockchain networks
+- **Best Rate Aggregation**: Automatically compares rates across multiple exchanges to find the best deal
+- **Zero Additional Fees**: No extra fees on top of exchange rates
+- **Simple Integration**: RESTful API with straightforward endpoints
+
+<Info>
+You can call the API without a key (subject to rate limits). With an API key, partners get higher rate limits and can qualify for revenue sharing.
+</Info>
+
+## Authentication
+
+<Tabs>
+<Tab title="No API Key (Anonymous)">
+The API supports anonymous calls without authentication. Anonymous users are subject to rate limiting:
+
+**Rate Limit**: 100 requests per minute
+
+```bash
+curl https://api.bestflow.xyz/coins
+```
+</Tab>
+
+<Tab title="With API Key">
+Partners can authenticate using a Bearer token to access higher rate limits and revenue sharing:
+
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  https://api.bestflow.xyz/coins
+```
+
+Benefits of API key authentication:
+- **Higher Rate Limits**: Bypass anonymous rate limits
+- **Revenue Sharing**: Qualify for swap volume revenue sharing
+</Tab>
+</Tabs>
+
+## Rate Limits
+
+| Authentication | Rate Limit |
+|----------------|------------|
+| Anonymous | 100 requests/minute |
+| API Key | Unlimited |
+
+When rate limited, the API returns a `429` status with:
+
+```json
+{
+  "error": "RATE_LIMITED",
+  "message": "Too many requests. Limit: 100 req/min. Retry after 60s."
+}
+```
+
+## Base URL
+
+All API requests should be made to:
+
+```
+https://api.bestflow.xyz
+```
+
+## Quick Start
+
+### 1. List Supported Coins
+
+```bash
+curl https://api.bestflow.xyz/coins
+```
+
+### 2. Get Rate Estimates
+
+```bash
+curl -X POST https://api.bestflow.xyz/rate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from": "BTC",
+    "to": "ETH",
+    "fromNetwork": "BTC",
+    "toNetwork": "ETH",
+    "amount": 0.5
+  }'
+```
+
+### 3. Create a Swap
+
+```bash
+curl -X POST https://api.bestflow.xyz/swap \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "exchange": "swapter",
+    "from": "BTC",
+    "to": "ETH",
+    "fromNetwork": "BTC",
+    "toNetwork": "ETH",
+    "toAddress": "0x...",
+    "amount": 0.5
+  }'
+```
+
+## Response Format
+
+All responses are returned in JSON format. Successful responses return the requested data directly. Error responses follow this structure:
+
+```json
+{
+  "error": "ERROR_CODE",
+  "message": "Human-readable error description"
+}
+```
+
+## Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `VALIDATION_ERROR` | 400 | Invalid request parameters |
+| `INVALID_FORMAT` | 400 | Malformed request data |
+| `UNKNOWN_EXCHANGE` | 400 | Exchange not recognized |
+| `UNAUTHORIZED` | 401 | Invalid or missing API key |
+| `SWAP_NOT_FOUND` | 404 | Swap does not exist |
+| `RATE_LIMITED` | 429 | Rate limit exceeded |
+| `SWAP_ERROR` | 502 | Swap creation failed |
+
+## Next Steps
+
+- [List Supported Coins](/api-reference/endpoint/coins) - View all available cryptocurrencies
+- [Get Exchanges](/api-reference/endpoint/exchanges) - List aggregated exchanges used for swaps
+- [Get Pair Information](/api-reference/endpoint/pair) - Check min/max limits for trading pairs
+- [Estimate Rates](/api-reference/endpoint/rate) - Compare rates across exchanges
+- [Create a Swap](/api-reference/endpoint/swap) - Execute a cryptocurrency swap
+- [Check Swap Status](/api-reference/endpoint/status) - Track your swap progress
+
+## Need Help?
+
+If you have questions or need assistance integrating the Bestflow API, please contact our support team.

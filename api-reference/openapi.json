@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
+    "title": "Bestflow API",
+    "description": "Bestflow is a cryptocurrency exchange aggregator that provides cross-chain swap capabilities without any additional fees. It aggregates multiple exchanges to offer users the best rates and seamless cryptocurrency swaps across different networks.",
     "license": {
       "name": "MIT"
     },
@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "http://api.bestflow.xyz"
     }
   ],
   "security": [
@@ -19,54 +19,78 @@
     }
   ],
   "paths": {
-    "/plants": {
+    "/health": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
+        "description": "Health check endpoint that returns the API status",
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "API is running",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
                   }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
           }
         }
-      },
+      }
+    },
+    "/coins": {
+      "get": {
+        "description": "Returns the list of supported cryptocurrencies and their networks",
+        "responses": {
+          "200": {
+            "description": "List of supported tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Token"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exchanges": {
+      "get": {
+        "description": "Returns the list of supported exchanges",
+        "responses": {
+          "200": {
+            "description": "List of supported exchanges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Exchange"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pair": {
       "post": {
-        "description": "Creates a new plant in the store",
+        "description": "Returns the minimum and maximum amount limits for a trading pair from supported exchanges",
         "requestBody": {
-          "description": "Plant to add to the store",
+          "description": "Trading pair details",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/PairRequest"
               }
             }
           },
@@ -74,17 +98,27 @@
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Pair limits from both exchanges",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/PairResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "unexpected error",
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
             "content": {
               "application/json": {
                 "schema": {
@@ -96,28 +130,43 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
+    "/rate": {
+      "post": {
+        "description": "Returns the estimated receive amount for a swap",
+        "requestBody": {
+          "description": "Rate estimation request details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateRequest"
+              }
             }
-          }
-        ],
+          },
+          "required": true
+        },
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
+          "200": {
+            "description": "Rate estimation from supported exchanges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateResponse"
+                }
+              }
+            }
           },
           "400": {
-            "description": "unexpected error",
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
             "content": {
               "application/json": {
                 "schema": {
@@ -128,25 +177,167 @@
           }
         }
       }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
+    },
+    "/swap": {
       "post": {
-        "description": "Information about a new plant added to the store",
+        "description": "Creates a new cryptocurrency swap on the specified exchange",
         "requestBody": {
-          "description": "Plant added to the store",
+          "description": "Swap creation details",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/SwapRequest"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
+            "description": "Swap created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Swap creation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/swap/{swapId}": {
+      "get": {
+        "description": "Returns the status and details of a specific swap by ID",
+        "parameters": [
+          {
+            "name": "swapId",
+            "in": "path",
+            "description": "Unique identifier for the swap",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Swap status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid swap ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Swap not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/validate": {
+      "post": {
+        "description": "Validates a cryptocurrency address for a specific currency and network",
+        "requestBody": {
+          "description": "Address validation details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Address validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -154,55 +345,546 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "Token": {
         "type": "object",
+        "required": [
+          "currency",
+          "name",
+          "logo",
+          "networks"
+        ],
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
+          "currency": {
+            "type": "string",
+            "description": "The currency ticker symbol",
+            "example": "ETH"
           },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+          "name": {
+            "type": "string",
+            "description": "The full name of the cryptocurrency",
+            "example": "Ethereum"
+          },
+          "logo": {
+            "type": "string",
+            "description": "URL to the currency's logo image",
+            "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/coins/ethereum.svg"
+          },
+          "networks": {
+            "type": "array",
+            "description": "List of supported networks for this currency",
+            "items": {
+              "$ref": "#/components/schemas/TokenNetwork"
+            }
           }
         }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
+      "Exchange": {
+        "type": "object",
+        "required": ["id", "name", "logo", "website", "termsOfUse"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Exchange identifier",
+            "example": "swapter"
           },
-          {
-            "required": [
-              "id"
+          "name": {
+            "type": "string",
+            "description": "Display name of the exchange",
+            "example": "Swapter"
+          },
+          "logo": {
+            "type": "string",
+            "description": "URL to the exchange logo image",
+            "example": "https://swapter.io/logo.png"
+          },
+          "website": {
+            "type": "string",
+            "description": "Exchange website URL",
+            "example": "https://swapter.io"
+          },
+          "termsOfUse": {
+            "type": "string",
+            "description": "Exchange terms of use URL",
+            "example": "https://swapter.io/terms-of-use"
+          }
+        }
+      },
+      "TokenNetwork": {
+        "type": "object",
+        "required": [
+          "network",
+          "contract",
+          "memo"
+        ],
+        "properties": {
+          "network": {
+            "type": "string",
+            "description": "The network identifier",
+            "example": "ETH"
+          },
+          "contract": {
+            "type": [
+              "string",
+              "null"
             ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
+            "description": "Smart contract address for tokens, null for native coins",
+            "example": null
+          },
+          "memo": {
+            "type": "boolean",
+            "description": "Whether this network requires a memo/tag for deposits",
+            "example": false
+          },
+          "explorer": {
+            "type": "string",
+            "description": "Base URL of the blockchain explorer",
+            "example": "https://ethplorer.io"
+          },
+          "explorerHash": {
+            "type": "string",
+            "description": "URL template for viewing transactions ({{txid}} placeholder)",
+            "example": "https://ethplorer.io/tx/{{txid}}"
+          },
+          "explorerAddress": {
+            "type": "string",
+            "description": "URL template for viewing addresses ({{addr}} placeholder)",
+            "example": "https://ethplorer.io/address/{{addr}}"
+          },
+        "explorerContract": {
+          "type": "string",
+          "description": "URL template for viewing smart contracts ({{contr}} placeholder)",
+          "example": "https://ethplorer.io/token/{{contr}}"
+        }
+        }
+      },
+      "PairRequest": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "fromNetwork",
+          "toNetwork"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source currency ticker",
+            "example": "BTC"
+          },
+          "to": {
+            "type": "string",
+            "description": "Destination currency ticker",
+            "example": "ETH"
+          },
+          "fromNetwork": {
+            "type": "string",
+            "description": "Source network identifier",
+            "example": "BTC"
+          },
+          "toNetwork": {
+            "type": "string",
+            "description": "Destination network identifier",
+            "example": "ETH"
+          }
+        }
+      },
+      "PairResponse": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "fromNetwork",
+          "toNetwork",
+          "limits"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source currency ticker"
+          },
+          "to": {
+            "type": "string",
+            "description": "Destination currency ticker"
+          },
+          "fromNetwork": {
+            "type": "string",
+            "description": "Source network identifier"
+          },
+          "toNetwork": {
+            "type": "string",
+            "description": "Destination network identifier"
+          },
+          "limits": {
+            "type": "array",
+            "description": "Swap limits per exchange",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeLimit"
             }
           }
-        ]
+        }
+      },
+      "ExchangeLimit": {
+        "type": "object",
+        "required": ["id", "minAmount", "maxAmount"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Exchange identifier",
+            "example": "swapter"
+          },
+          "minAmount": {
+            "type": ["number", "null"],
+            "description": "Minimum swap amount. Null means unavailable or no minimum."
+          },
+          "maxAmount": {
+            "type": ["number", "null"],
+            "description": "Maximum swap amount. Null means unavailable or no maximum."
+          }
+        }
+      },
+      "RateRequest": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "fromNetwork",
+          "toNetwork",
+          "amount"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source currency ticker",
+            "example": "BTC"
+          },
+          "to": {
+            "type": "string",
+            "description": "Destination currency ticker",
+            "example": "ETH"
+          },
+          "fromNetwork": {
+            "type": "string",
+            "description": "Source network identifier",
+            "example": "BTC"
+          },
+          "toNetwork": {
+            "type": "string",
+            "description": "Destination network identifier",
+            "example": "ETH"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Amount to swap",
+            "example": 0.5
+          }
+        }
+      },
+      "RateResponse": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "fromNetwork",
+          "toNetwork",
+          "amount",
+          "rates"
+        ],
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "fromNetwork": {
+            "type": "string"
+          },
+          "toNetwork": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "rates": {
+            "type": "array",
+            "description": "Rate estimates per exchange, sorted descending by estReceive (best rate first). Exchanges with unavailable rates appear last.",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeRate"
+            }
+          }
+        }
+      },
+      "ExchangeRate": {
+        "type": "object",
+        "required": ["id", "estReceive", "processingTime"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Exchange identifier",
+            "example": "swapter"
+          },
+          "estReceive": {
+            "type": ["number", "null"],
+            "description": "Estimated amount to receive. Null means rate is unavailable."
+          },
+          "processingTime": {
+            "type": ["string", "null"],
+            "description": "Estimated processing time. Null means no info."
+          }
+        }
+      },
+      "SwapRequest": {
+        "type": "object",
+        "required": [
+          "exchange",
+          "from",
+          "to",
+          "fromNetwork",
+          "toNetwork",
+          "toAddress",
+          "amount"
+        ],
+        "properties": {
+          "exchange": {
+            "type": "string",
+            "enum": [
+              "swapter",
+              "thechange"
+            ],
+            "description": "Exchange to use for the swap"
+          },
+          "from": {
+            "type": "string",
+            "description": "Source currency ticker"
+          },
+          "to": {
+            "type": "string",
+            "description": "Destination currency ticker"
+          },
+          "fromNetwork": {
+            "type": "string",
+            "description": "Source network identifier"
+          },
+          "toNetwork": {
+            "type": "string",
+            "description": "Destination network identifier"
+          },
+          "toAddress": {
+            "type": "string",
+            "description": "Destination wallet address"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Amount to swap"
+          },
+          "memo": {
+            "type": "string",
+            "description": "Optional memo/tag for destination address"
+          },
+          "userDeviceId": {
+            "type": "string",
+            "description": "Required for thechange exchange - identifies the user's device"
+          }
+        }
+      },
+      "SwapResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "from",
+          "to",
+          "fromNetwork",
+          "toNetwork",
+          "sendAmount",
+          "sendAddress",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the swap"
+          },
+          "from": {
+            "type": "string",
+            "description": "Source currency ticker"
+          },
+          "to": {
+            "type": "string",
+            "description": "Destination currency ticker"
+          },
+          "fromNetwork": {
+            "type": "string",
+            "description": "Source network identifier"
+          },
+          "toNetwork": {
+            "type": "string",
+            "description": "Destination network identifier"
+          },
+          "sendAmount": {
+            "type": "number",
+            "description": "Amount to send to complete the swap"
+          },
+          "sendAddress": {
+            "type": "string",
+            "description": "Deposit address to send funds to"
+          },
+          "sendMemo": {
+            "type": "string",
+            "description": "Memo/tag for the deposit (if required)"
+          },
+          "createdAt": {
+            "type": "integer",
+            "description": "Swap creation timestamp (Unix timestamp in seconds)"
+          }
+        }
+      },
+      "SwapStatusResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "from",
+          "to",
+          "fromNetwork",
+          "toNetwork",
+          "sendAmount",
+          "estReceive",
+          "sendAddress",
+          "receiveAddress",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the swap"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current swap status"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "fromNetwork": {
+            "type": "string"
+          },
+          "toNetwork": {
+            "type": "string"
+          },
+          "sendAmount": {
+            "type": "number",
+            "description": "Expected deposit amount"
+          },
+          "estReceive": {
+            "type": "number",
+            "description": "Estimated amount to be received"
+          },
+          "sendAddress": {
+            "type": "string",
+            "description": "Deposit address"
+          },
+          "sendMemo": {
+            "type": "string",
+            "description": "Deposit memo/tag"
+          },
+          "receiveAddress": {
+            "type": "string",
+            "description": "Destination address"
+          },
+          "receiveMemo": {
+            "type": "string",
+            "description": "Destination memo/tag"
+          },
+          "hashIn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Inbound transaction hash"
+          },
+          "hashOut": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Outbound transaction hash"
+          },
+          "createdAt": {
+            "type": "integer",
+            "description": "Swap creation timestamp (Unix timestamp in seconds)"
+          }
+        }
+      },
+      "ValidateRequest": {
+        "type": "object",
+        "required": [
+          "currency",
+          "address",
+          "network"
+        ],
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "Currency ticker"
+          },
+          "address": {
+            "type": "string",
+            "description": "Wallet address to validate"
+          },
+          "network": {
+            "type": "string",
+            "description": "Network identifier"
+          },
+          "memo": {
+            "type": "string",
+            "description": "Optional memo/tag to validate"
+          }
+        }
+      },
+      "ValidateResponse": {
+        "type": "object",
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "The validated address. If the same address is returned, it means the address is valid"
+          },
+          "memo": {
+            "type": "string",
+            "description": "The memo/tag associated with the address (if applicable)"
+          }
+        }
       },
       "Error": {
+        "type": "object",
         "required": [
           "error",
           "message"
         ],
-        "type": "object",
         "properties": {
           "error": {
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "description": "Error code",
+            "enum": [
+              "VALIDATION_ERROR",
+              "INVALID_FORMAT",
+              "UNKNOWN_EXCHANGE",
+              "SWAP_ERROR",
+              "SWAP_NOT_FOUND",
+              "UNAUTHORIZED",
+              "RATE_LIMITED"
+            ]
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable error message"
           }
         }
       }
@@ -210,7 +892,8 @@
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
-        "scheme": "bearer"
+        "scheme": "bearer",
+        "description": "API key provided as Bearer token. Optional for public endpoints, required for higher rate limits."
       }
     }
   }

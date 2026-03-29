@@ -380,7 +380,16 @@
       },
       "Exchange": {
         "type": "object",
-        "required": ["id", "name", "logo", "website", "termsOfUse"],
+        "required": [
+          "id",
+          "name",
+          "description",
+          "logo",
+          "fullLogo",
+          "website",
+          "termsOfUse",
+          "kyc"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -392,10 +401,20 @@
             "description": "Display name of the exchange",
             "example": "Swapter"
           },
+          "description": {
+            "type": "string",
+            "description": "Brief description of the exchange",
+            "example": "Swapter - service that focuses on the cryptocurrency industry and its development."
+          },
           "logo": {
             "type": "string",
             "description": "URL to the exchange logo image",
-            "example": "https://swapter.io/logo.png"
+            "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter.svg"
+          },
+          "fullLogo": {
+            "type": "string",
+            "description": "URL to the full-size logo image",
+            "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter-full.svg"
           },
           "website": {
             "type": "string",
@@ -404,8 +423,19 @@
           },
           "termsOfUse": {
             "type": "string",
-            "description": "Exchange terms of use URL",
+            "description": "Exchange terms of use URL. User must accept this before swapping.",
             "example": "https://swapter.io/terms-of-use"
+          },
+          "kyc": {
+            "type": "string",
+            "enum": [
+              "none",
+              "low",
+              "medium",
+              "high"
+            ],
+            "description": "Frequency of KYC requirements",
+            "example": "low"
           }
         }
       },
@@ -450,11 +480,11 @@
             "description": "URL template for viewing addresses ({{addr}} placeholder)",
             "example": "https://ethplorer.io/address/{{addr}}"
           },
-        "explorerContract": {
-          "type": "string",
-          "description": "URL template for viewing smart contracts ({{contr}} placeholder)",
-          "example": "https://ethplorer.io/token/{{contr}}"
-        }
+          "explorerContract": {
+            "type": "string",
+            "description": "URL template for viewing smart contracts ({{contr}} placeholder)",
+            "example": "https://ethplorer.io/token/{{contr}}"
+          }
         }
       },
       "PairRequest": {
@@ -525,19 +555,29 @@
       },
       "ExchangeLimit": {
         "type": "object",
-        "required": ["id", "minAmount", "maxAmount"],
+        "required": [
+          "exchange",
+          "minAmount",
+          "maxAmount"
+        ],
         "properties": {
-          "id": {
+          "exchange": {
             "type": "string",
             "description": "Exchange identifier",
             "example": "swapter"
           },
           "minAmount": {
-            "type": ["number", "null"],
+            "type": [
+              "number",
+              "null"
+            ],
             "description": "Minimum swap amount. Null means unavailable or no minimum."
           },
           "maxAmount": {
-            "type": ["number", "null"],
+            "type": [
+              "number",
+              "null"
+            ],
             "description": "Maximum swap amount. Null means unavailable or no maximum."
           }
         }
@@ -617,19 +657,29 @@
       },
       "ExchangeRate": {
         "type": "object",
-        "required": ["id", "estReceive", "processingTime"],
+        "required": [
+          "exchange",
+          "estReceive",
+          "eta"
+        ],
         "properties": {
-          "id": {
+          "exchange": {
             "type": "string",
             "description": "Exchange identifier",
             "example": "swapter"
           },
           "estReceive": {
-            "type": ["number", "null"],
+            "type": [
+              "number",
+              "null"
+            ],
             "description": "Estimated amount to receive. Null means rate is unavailable."
           },
-          "processingTime": {
-            "type": ["string", "null"],
+          "eta": {
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Estimated processing time. Null means no info."
           }
         }
@@ -893,7 +943,7 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "API key provided as Bearer token. Optional for public endpoints, required for higher rate limits."
+        "description": "Optional Bearer authentication. Required for unlimited requests and revenue sharing."
       }
     }
   }

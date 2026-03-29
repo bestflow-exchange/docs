@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://api.bestflow.xyz"
+      "url": "https://api.bestflow.xyz"
     }
   ],
   "security": [
@@ -891,7 +891,7 @@
     },
     "securitySchemes": {
       "bearerAuth": {
-        "type": "https",
+        "type": "http",
         "scheme": "bearer",
         "description": "API key provided as Bearer token. Optional for public endpoints, required for higher rate limits."
       }

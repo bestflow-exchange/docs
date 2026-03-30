@@ -14,6 +14,8 @@ The Bestflow API enables developers to integrate cryptocurrency swap functionali
 - **Cross-Chain Swaps**: Seamlessly swap cryptocurrencies across different blockchain networks
 - **Best Rate Aggregation**: Automatically compares rates across multiple exchanges to find the best deal
 - **Zero Additional Fees**: No extra fees on top of exchange rates
+- **Non-Custodial**: You send directly to the exchange, receive directly to your wallet - we never hold your funds
+- **Anonymous**: No KYC, no registration, no wallet connection required. Swaps are private and untraceable - protected from MEV, tracking, and copytrading
 - **Simple Integration**: RESTful API with straightforward endpoints
 
 <Info>
@@ -98,7 +100,6 @@ curl -X POST https://api.bestflow.xyz/rate \
 ```bash
 curl -X POST https://api.bestflow.xyz/swap \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "exchange": "swapter",
     "from": "BTC",

@@ -24,7 +24,6 @@
               "api-reference/endpoint/health",
               "api-reference/endpoint/coins",
               "api-reference/endpoint/exchanges",
-              "api-reference/endpoint/pair",
               "api-reference/endpoint/rate",
               "api-reference/endpoint/swap",
               "api-reference/endpoint/status"

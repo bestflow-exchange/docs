@@ -384,7 +384,7 @@
           "id",
           "name",
           "description",
-          "logo",
+          "icon",
           "fullLogoLight",
           "fullLogoDark",
           "website",
@@ -407,19 +407,19 @@
             "description": "Brief description of the exchange",
             "example": "Swapter - service that focuses on the cryptocurrency industry and its development."
           },
-          "logo": {
+          "icon": {
             "type": "string",
-            "description": "URL to the exchange logo image",
+            "description": "URL to the exchange icon image",
             "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter.svg"
           },
           "fullLogoLight": {
             "type": "string",
-            "description": "URL to the full-size logo image for light theme",
+            "description": "URL to the full logo image for light theme",
             "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter-light.svg"
           },
           "fullLogoDark": {
             "type": "string",
-            "description": "URL to the full-size logo image for dark theme",
+            "description": "URL to the full logo image for dark theme",
             "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter-dark.svg"
           },
           "website": {

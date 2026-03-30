@@ -28,7 +28,7 @@ You can call the API without a key (subject to rate limits). With an API key, pa
 <Tab title="No API Key (Anonymous)">
 The API supports anonymous calls without authentication. Anonymous users are subject to rate limiting:
 
-**Rate Limit**: 100 requests per minute
+**Rate Limit**: 20 requests per minute
 
 ```bash
 curl https://api.bestflow.xyz/coins
@@ -53,7 +53,7 @@ Benefits of API key authentication:
 
 | Authentication | Rate Limit |
 |----------------|------------|
-| Anonymous | 100 requests/minute |
+| Anonymous | 20 requests/minute |
 | API Key | Unlimited |
 
 When rate limited, the API returns a `429` status with:

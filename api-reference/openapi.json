@@ -385,7 +385,8 @@
           "name",
           "description",
           "logo",
-          "fullLogo",
+          "fullLogoLight",
+          "fullLogoDark",
           "website",
           "termsOfUse",
           "kyc"
@@ -411,10 +412,15 @@
             "description": "URL to the exchange logo image",
             "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter.svg"
           },
-          "fullLogo": {
+          "fullLogoLight": {
             "type": "string",
-            "description": "URL to the full-size logo image",
-            "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter-full.svg"
+            "description": "URL to the full-size logo image for light theme",
+            "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter-light.svg"
+          },
+          "fullLogoDark": {
+            "type": "string",
+            "description": "URL to the full-size logo image for dark theme",
+            "example": "https://cdn.jsdelivr.net/gh/bestflow-exchange/assets@main/exchanges/swapter-dark.svg"
           },
           "website": {
             "type": "string",
@@ -943,7 +949,7 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Optional Bearer authentication. Required for unlimited requests and revenue sharing."
+        "description": "Optional Bearer authentication using an API key provided as a Bearer token. Required for unlimited requests and revenue sharing."
       }
     }
   }

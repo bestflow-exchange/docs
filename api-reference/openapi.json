@@ -82,54 +82,6 @@
         }
       }
     },
-    "/pair": {
-      "post": {
-        "description": "Returns the minimum and maximum amount limits for a trading pair from supported exchanges",
-        "requestBody": {
-          "description": "Trading pair details",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PairRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Pair limits from both exchanges",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PairResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limit exceeded",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/rate": {
       "post": {
         "description": "Returns the estimated receive amount for a swap",
@@ -493,101 +445,6 @@
           }
         }
       },
-      "PairRequest": {
-        "type": "object",
-        "required": [
-          "from",
-          "to",
-          "fromNetwork",
-          "toNetwork"
-        ],
-        "properties": {
-          "from": {
-            "type": "string",
-            "description": "Source currency ticker",
-            "example": "BTC"
-          },
-          "to": {
-            "type": "string",
-            "description": "Destination currency ticker",
-            "example": "ETH"
-          },
-          "fromNetwork": {
-            "type": "string",
-            "description": "Source network identifier",
-            "example": "BTC"
-          },
-          "toNetwork": {
-            "type": "string",
-            "description": "Destination network identifier",
-            "example": "ETH"
-          }
-        }
-      },
-      "PairResponse": {
-        "type": "object",
-        "required": [
-          "from",
-          "to",
-          "fromNetwork",
-          "toNetwork",
-          "limits"
-        ],
-        "properties": {
-          "from": {
-            "type": "string",
-            "description": "Source currency ticker"
-          },
-          "to": {
-            "type": "string",
-            "description": "Destination currency ticker"
-          },
-          "fromNetwork": {
-            "type": "string",
-            "description": "Source network identifier"
-          },
-          "toNetwork": {
-            "type": "string",
-            "description": "Destination network identifier"
-          },
-          "limits": {
-            "type": "array",
-            "description": "Swap limits per exchange",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeLimit"
-            }
-          }
-        }
-      },
-      "ExchangeLimit": {
-        "type": "object",
-        "required": [
-          "exchange",
-          "minAmount",
-          "maxAmount"
-        ],
-        "properties": {
-          "exchange": {
-            "type": "string",
-            "description": "Exchange identifier",
-            "example": "swapter"
-          },
-          "minAmount": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "description": "Minimum swap amount. Null means unavailable or no minimum."
-          },
-          "maxAmount": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "description": "Maximum swap amount. Null means unavailable or no maximum."
-          }
-        }
-      },
       "RateRequest": {
         "type": "object",
         "required": [
@@ -666,7 +523,9 @@
         "required": [
           "exchange",
           "estReceive",
-          "eta"
+          "eta",
+          "minAmount",
+          "maxAmount"
         ],
         "properties": {
           "exchange": {
@@ -687,6 +546,20 @@
               "null"
             ],
             "description": "Estimated processing time. Null means no info."
+          },
+          "minAmount": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Minimum swap amount for this pair. Null means unavailable or no minimum."
+          },
+          "maxAmount": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Maximum swap amount for this pair. Null means unavailable or no maximum."
           }
         }
       },

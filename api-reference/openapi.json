@@ -245,54 +245,6 @@
           }
         }
       }
-    },
-    "/validate": {
-      "post": {
-        "description": "Validates a cryptocurrency address for a specific currency and network",
-        "requestBody": {
-          "description": "Address validation details",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ValidateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Address validation result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidateResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limit exceeded",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -611,10 +563,6 @@
           "memo": {
             "type": "string",
             "description": "Optional memo/tag for destination address"
-          },
-          "userDeviceId": {
-            "type": "string",
-            "description": "Required for thechange exchange - identifies the user's device"
           }
         }
       },
@@ -746,48 +694,6 @@
           "createdAt": {
             "type": "integer",
             "description": "Swap creation timestamp (Unix timestamp in seconds)"
-          }
-        }
-      },
-      "ValidateRequest": {
-        "type": "object",
-        "required": [
-          "currency",
-          "address",
-          "network"
-        ],
-        "properties": {
-          "currency": {
-            "type": "string",
-            "description": "Currency ticker"
-          },
-          "address": {
-            "type": "string",
-            "description": "Wallet address to validate"
-          },
-          "network": {
-            "type": "string",
-            "description": "Network identifier"
-          },
-          "memo": {
-            "type": "string",
-            "description": "Optional memo/tag to validate"
-          }
-        }
-      },
-      "ValidateResponse": {
-        "type": "object",
-        "required": [
-          "address"
-        ],
-        "properties": {
-          "address": {
-            "type": "string",
-            "description": "The validated address. If the same address is returned, it means the address is valid"
-          },
-          "memo": {
-            "type": "string",
-            "description": "The memo/tag associated with the address (if applicable)"
           }
         }
       },

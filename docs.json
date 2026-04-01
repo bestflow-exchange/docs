@@ -62,5 +62,15 @@
     "socials": {
       "x": "https://x.com/bestflow_"
     }
-  }
+  },
+  "seo": {
+    "indexing": "navigable"
+  },
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
+  "logo": "/logo/full-white.png",
+  "description": "Powering seamless cross-chain integration. Best rates, 0 extra fees, and non-custodial swaps. Build with privacy in mind.",
+  "favicon": "/favicon.png"
 }

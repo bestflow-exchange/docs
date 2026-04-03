@@ -531,7 +531,8 @@
             "type": "string",
             "enum": [
               "swapter",
-              "thechange"
+              "thechange",
+              "etzswap"
             ],
             "description": "Exchange to use for the swap"
           },
@@ -612,8 +613,9 @@
             "description": "Memo/tag for the deposit (if required)"
           },
           "createdAt": {
-            "type": "integer",
-            "description": "Swap creation timestamp (Unix timestamp in seconds)"
+            "type": "string",
+            "format": "date-time",
+            "description": "Swap creation timestamp in ISO 8601 format"
           }
         }
       },
@@ -621,6 +623,7 @@
         "type": "object",
         "required": [
           "id",
+          "exchange",
           "status",
           "from",
           "to",
@@ -636,6 +639,15 @@
           "id": {
             "type": "string",
             "description": "Unique identifier for the swap"
+          },
+          "exchange": {
+            "type": "string",
+            "description": "Exchange identifier",
+            "enum": [
+              "swapter",
+              "thechange",
+              "etzswap"
+            ]
           },
           "status": {
             "type": "string",
@@ -692,8 +704,9 @@
             "description": "Outbound transaction hash"
           },
           "createdAt": {
-            "type": "integer",
-            "description": "Swap creation timestamp (Unix timestamp in seconds)"
+            "type": "string",
+            "format": "date-time",
+            "description": "Swap creation timestamp in ISO 8601 format"
           }
         }
       },

@@ -15,9 +15,7 @@
   ],
   "security": [
     {},
-    {
-      "bearerAuth": []
-    }
+    { "bearerAuth": [] }
   ],
   "paths": {
     "/health": {
@@ -30,6 +28,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["status"],
                   "properties": {
                     "status": {
                       "type": "string",
@@ -39,7 +38,9 @@
                 }
               }
             }
-          }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailableError" }
         }
       }
     },
@@ -59,7 +60,9 @@
                 }
               }
             }
-          }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailableError" }
         }
       }
     },
@@ -79,7 +82,9 @@
                 }
               }
             }
-          }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailableError" }
         }
       }
     },
@@ -118,6 +123,7 @@
               }
             }
           },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
           "429": {
             "description": "Rate limit exceeded",
             "content": {
@@ -127,7 +133,8 @@
                 }
               }
             }
-          }
+          },
+          "503": { "$ref": "#/components/responses/ServiceUnavailableError" }
         }
       }
     },
@@ -166,6 +173,7 @@
               }
             }
           },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
           "429": {
             "description": "Rate limit exceeded",
             "content": {
@@ -176,8 +184,8 @@
               }
             }
           },
-          "502": {
-            "description": "Swap creation failed",
+          "500": {
+            "description": "Unexpected server failure",
             "content": {
               "application/json": {
                 "schema": {
@@ -185,7 +193,18 @@
                 }
               }
             }
-          }
+          },
+          "502": {
+            "description": "Upstream exchange rejected or failed swap creation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": { "$ref": "#/components/responses/ServiceUnavailableError" }
         }
       }
     },
@@ -215,7 +234,7 @@
             }
           },
           "400": {
-            "description": "Invalid swap ID format",
+            "description": "Invalid swap ID format, unknown exchange prefix, or validation failure",
             "content": {
               "application/json": {
                 "schema": {
@@ -224,6 +243,7 @@
               }
             }
           },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
           "404": {
             "description": "Swap not found",
             "content": {
@@ -243,21 +263,57 @@
                 }
               }
             }
-          }
+          },
+          "500": {
+            "description": "Unexpected server failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": { "$ref": "#/components/responses/ServiceUnavailableError" }
         }
       }
     }
   },
   "components": {
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Invalid or unknown API key",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "UNAUTHORIZED",
+              "message": "Invalid API key"
+            }
+          }
+        }
+      },
+      "ServiceUnavailableError": {
+        "description": "Auth dependency unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "SERVICE_UNAVAILABLE",
+              "message": "Auth service unavailable"
+            }
+          }
+        }
+      }
+    },
     "schemas": {
       "Token": {
         "type": "object",
-        "required": [
-          "currency",
-          "name",
-          "logo",
-          "networks"
-        ],
+        "required": ["currency", "name", "logo", "networks"],
         "properties": {
           "currency": {
             "type": "string",
@@ -300,7 +356,8 @@
           "id": {
             "type": "string",
             "description": "Exchange identifier",
-            "example": "swapter"
+            "example": "swapter",
+            "enum": ["swapter", "etzswap", "pegasusswap"]
           },
           "name": {
             "type": "string",
@@ -339,12 +396,7 @@
           },
           "kyc": {
             "type": "string",
-            "enum": [
-              "none",
-              "low",
-              "medium",
-              "high"
-            ],
+            "enum": ["none", "low", "medium", "high"],
             "description": "Frequency of KYC requirements",
             "example": "low"
           }
@@ -352,11 +404,7 @@
       },
       "TokenNetwork": {
         "type": "object",
-        "required": [
-          "network",
-          "contract",
-          "memo"
-        ],
+        "required": ["network", "contract", "memo"],
         "properties": {
           "network": {
             "type": "string",
@@ -364,49 +412,40 @@
             "example": "ETH"
           },
           "contract": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Smart contract address for tokens, null for native coins",
+            "type": ["string", "null"],
+            "description": "Smart contract address for tokens; null for native coins",
             "example": null
           },
           "memo": {
             "type": "boolean",
-            "description": "Whether this network requires a memo/tag for deposits",
+            "description": "Whether this network expects a memo/tag for deposits",
             "example": false
           },
           "explorer": {
             "type": "string",
             "description": "Base URL of the blockchain explorer",
-            "example": "https://ethplorer.io"
+            "example": "https://etherscan.io"
           },
           "explorerHash": {
             "type": "string",
             "description": "URL template for viewing transactions ({{txid}} placeholder)",
-            "example": "https://ethplorer.io/tx/{{txid}}"
+            "example": "https://etherscan.io/tx/{{txid}}"
           },
           "explorerAddress": {
             "type": "string",
             "description": "URL template for viewing addresses ({{addr}} placeholder)",
-            "example": "https://ethplorer.io/address/{{addr}}"
+            "example": "https://etherscan.io/address/{{addr}}"
           },
           "explorerContract": {
             "type": "string",
             "description": "URL template for viewing smart contracts ({{contr}} placeholder)",
-            "example": "https://ethplorer.io/token/{{contr}}"
+            "example": "https://etherscan.io/token/{{contr}}"
           }
         }
       },
       "RateRequest": {
         "type": "object",
-        "required": [
-          "from",
-          "to",
-          "fromNetwork",
-          "toNetwork",
-          "amount"
-        ],
+        "required": ["from", "to", "fromNetwork", "toNetwork", "amount"],
         "properties": {
           "from": {
             "type": "string",
@@ -438,14 +477,7 @@
       },
       "RateResponse": {
         "type": "object",
-        "required": [
-          "from",
-          "to",
-          "fromNetwork",
-          "toNetwork",
-          "amount",
-          "rates"
-        ],
+        "required": ["from", "to", "fromNetwork", "toNetwork", "amount", "rates"],
         "properties": {
           "from": {
             "type": "string"
@@ -473,45 +505,28 @@
       },
       "ExchangeRate": {
         "type": "object",
-        "required": [
-          "exchange",
-          "estReceive",
-          "eta",
-          "minAmount",
-          "maxAmount"
-        ],
+        "required": ["exchange", "estReceive", "eta", "minAmount", "maxAmount"],
         "properties": {
           "exchange": {
             "type": "string",
+            "enum": ["swapter", "etzswap", "pegasusswap"],
             "description": "Exchange identifier",
             "example": "swapter"
           },
           "estReceive": {
-            "type": [
-              "number",
-              "null"
-            ],
+            "type": ["number", "null"],
             "description": "Estimated amount to receive. Null means rate is unavailable."
           },
           "eta": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "Estimated processing time. Null means no info."
           },
           "minAmount": {
-            "type": [
-              "number",
-              "null"
-            ],
+            "type": ["number", "null"],
             "description": "Minimum swap amount for this pair. Null means unavailable or no minimum."
           },
           "maxAmount": {
-            "type": [
-              "number",
-              "null"
-            ],
+            "type": ["number", "null"],
             "description": "Maximum swap amount for this pair. Null means unavailable or no maximum."
           }
         }
@@ -530,11 +545,7 @@
         "properties": {
           "exchange": {
             "type": "string",
-            "enum": [
-              "swapter",
-              "etzswap",
-              "pegasusswap"
-            ],
+            "enum": ["swapter", "etzswap", "pegasusswap"],
             "description": "Exchange to use for the swap"
           },
           "from": {
@@ -570,15 +581,7 @@
       },
       "SwapResponse": {
         "type": "object",
-        "required": [
-          "id",
-          "from",
-          "to",
-          "fromNetwork",
-          "toNetwork",
-          "sendAmount",
-          "sendAddress"
-        ],
+        "required": ["id", "from", "to", "fromNetwork", "toNetwork", "sendAmount", "sendAddress", "sendMemo"],
         "properties": {
           "id": {
             "type": "string",
@@ -609,8 +612,8 @@
             "description": "Deposit address to send funds to"
           },
           "sendMemo": {
-            "type": "string",
-            "description": "Memo/tag for the deposit (if required)"
+            "type": ["string", "null"],
+            "description": "Memo/tag for the deposit; null when not required or not provided"
           }
         }
       },
@@ -627,7 +630,11 @@
           "sendAmount",
           "estReceive",
           "sendAddress",
+          "sendMemo",
           "receiveAddress",
+          "receiveMemo",
+          "hashIn",
+          "hashOut",
           "createdAt"
         ],
         "properties": {
@@ -637,16 +644,25 @@
           },
           "exchange": {
             "type": "string",
-            "description": "Exchange identifier",
-            "enum": [
-              "swapter",
-              "etzswap",
-              "pegasusswap"
-            ]
+            "enum": ["swapter", "etzswap", "pegasusswap"],
+            "description": "Exchange identifier"
           },
           "status": {
             "type": "string",
-            "description": "Current swap status"
+            "description": "Current swap status",
+            "enum": [
+              "Waiting",
+              "Confirmation",
+              "Confirmed",
+              "Exchanging",
+              "Sending",
+              "Success",
+              "Frozen",
+              "Refunded",
+              "Overdue",
+              "Suspended",
+              "Error"
+            ]
           },
           "from": {
             "type": "string"
@@ -673,29 +689,23 @@
             "description": "Deposit address"
           },
           "sendMemo": {
-            "type": "string",
-            "description": "Deposit memo/tag"
+            "type": ["string", "null"],
+            "description": "Deposit memo/tag; null when absent"
           },
           "receiveAddress": {
             "type": "string",
             "description": "Destination address"
           },
           "receiveMemo": {
-            "type": "string",
-            "description": "Destination memo/tag"
+            "type": ["string", "null"],
+            "description": "Destination memo/tag; null when absent"
           },
           "hashIn": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "Inbound transaction hash"
           },
           "hashOut": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "Outbound transaction hash"
           },
           "createdAt": {
@@ -707,10 +717,7 @@
       },
       "Error": {
         "type": "object",
-        "required": [
-          "error",
-          "message"
-        ],
+        "required": ["error", "message"],
         "properties": {
           "error": {
             "type": "string",
@@ -722,7 +729,8 @@
               "SWAP_ERROR",
               "SWAP_NOT_FOUND",
               "UNAUTHORIZED",
-              "RATE_LIMITED"
+              "RATE_LIMITED",
+              "SERVICE_UNAVAILABLE"
             ]
           },
           "message": {
